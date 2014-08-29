@@ -1,0 +1,13 @@
+Package: generalgcrma
+Type: Package
+Title: GCRMA background adjustment for Affymetrix Tiling, Exon and Gene ST microarrays.
+Version: 1.1.5
+Date: 2012-12-10
+Author: Julien Lelong, Johannes Rainer
+Maintainer: Johannes Rainer <johannes.rainer@i-med.ac.at>
+Depends: gcrma (>= 2.2.0), splines (>= 2.0.0), preprocessCore (>= 1.0.0), RColorBrewer, Biostrings, methods
+Suggests: snow, parallel, affyPLM
+Description: This package provides functions for the GCRMA background adjustment of non-AffyBatch based microarray data. Some of the functions are designed to run on a computer cluster or on a multicore computer in a parallel way.
+License: MIT
+LazyLoad: yes
+
