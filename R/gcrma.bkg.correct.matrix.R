@@ -55,10 +55,11 @@ function( x,
   if( !missing( cl ) | !missing( mc.cores ) ){
     if( verbose ) cat(" in parallel processing mode ")
     ## building a list with values and affinities...
-    List <- vector( "list", ncol( x ) )
-    for( i in 1:ncol( x ) ){
-      List[[i]] <- list( values=x[ , i ], affinities=affinities[ , i ] )
-    }
+    ##List <- vector( "list", ncol( x ) )
+    ##for( i in 1:ncol( x ) ){
+    ##  List[[i]] <- list( values=x[ , i ], affinities=affinities[ , i ] )
+    ##}
+    List <- mapply( list, split( x, col(x) ), split( affinities, col( affinities ) ), SIMPLIFY = FALSE )  ## eventually faster one-liner
     if( !missing( cl ) ){
       ## use snow
       x <- parSapply( cl, List, .performBgAdjustAffinities, NCprobe=NCprobe, k=k, fast=FALSE, nomm=TRUE, verbose=verbose, GSB.adjust=GSB.adjust, fit1=fit1 )
@@ -66,7 +67,7 @@ function( x,
     }
     if( !missing( mc.cores ) ){
       ## use multicore/parallel
-      tmp <- mclapply( List, FUN=.performBgAdjustAffinities, NCprobe=NCprobe, k=k, fast=FALSE, nomm=TRUE, verbose=verbose, GSB.adjust=GSB.adjust, fit1=fit1, mc.cores=mc.cores, mc.set.seed=FALSE )
+      tmp <- mclapply( List, FUN=.performBgAdjustAffinities, NCprobe=NCprobe, k=k, fast=FALSE, nomm=TRUE, verbose=verbose, GSB.adjust=GSB.adjust, fit1=fit1, mc.cores=mc.cores, mc.set.seed=FALSE, mc.preschedule = TRUE, mc.allow.recursive = FALSE )
       x <- do.call( cbind, tmp )
       rm( tmp )
       colnames( x ) <- CN
@@ -98,26 +99,26 @@ function( x,
 }
 
 .performBgAdjustAffinities <- function( x, NCprobe, k, fast, nomm, verbose, GSB.adjust, fit1 ){
-  require( "gcrma", quietly=TRUE )
-  if( verbose ) cat(".")
-  z <- bg.adjust.affinities( pms=x[["values"]],
-                            ncs=x[["values"]][ NCprobe ],
-                            apm=x[["affinities"]],
-                            anc=x[["affinities"]][ NCprobe ],
-                            k=k,
-                            fast=fast,
-                            nomm=nomm,
-                            index.affinities=1:length( x[["values"]] )
-                            )
-  if( GSB.adjust ){
-    z <- GSB.adj( Yin=x[["values"]],
-                    subset=1:length( x[["values"]] ),
-                    aff=x[["affinities"]],
-                    fit1=fit1,
-                    k=k
-                    )
-  }
-  gc()
+    ##require( "gcrma", quietly=TRUE )
+    if( verbose ) cat(".")
+    ## assuming values in 1, affinities in 2.
+    z <- bg.adjust.affinities( pms=x[[ 1 ]],
+                              ncs=x[[ 1 ]][ NCprobe ],
+                              apm=x[[ 2 ]],
+                              anc=x[[ 2 ]][ NCprobe ],
+                              k=k,
+                              fast=fast,
+                              nomm=nomm,
+                              index.affinities=1:length( x[[ 1 ]] )
+                              )
+    if( GSB.adjust ){
+        z <- GSB.adj( Yin=x[[ 1 ]],
+                     subset=1:length( x[[ 1 ]] ),
+                     aff=x[[ 2 ]],
+                     fit1=fit1,
+                     k=k
+                     )
+    }
     return( z )
 }
 

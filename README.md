@@ -11,3 +11,12 @@ This packages provides functionality to perform a GCRMA pre-processing for the n
 
 Note that the `affy` package displays a warning message when trying to read the Gene ST microarray and throws an error when reading Exon ST microarrays claiming that the package is not designed to run analyses on these types of microarrays. Actually, using the `generalgcrma` package and the alternative CDF packages above it is possible to analyze them, so, in order to analyze Exon arrays the source code of the `affy` package should be downloaded, the respective code that throws the error message commented out and this modified package installed.
 
+Known Issues
+------------
+
+Multicore processing will fail in OS X if R was compiled using the BLAS and LAPACK versions provided by Apple's `vecLib`. In detail, the `predict.loess` call performed during NSB modeling fails with a "memory not mapped" error message.
+
+Changelog
+---------
+
+2014-09-24 (1.1.6): replaced for loop to split data matrix for parallel processing with split and mapply.
